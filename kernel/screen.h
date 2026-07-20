@@ -18,6 +18,8 @@ void set_cursor(int x, int y);
 
 void draw_line(int x0, int y0, int x1, int y1, uint32_t color);
 
-void draw_rectangle(int x, int y, int width, int height, uint32_t color);
+void draw_rectangle(int x, int y, int width, int height, uint32_t color, bool filled);
+
+void draw_circle(int cx, int cy, int radius, uint32_t color);
 
 #endif
