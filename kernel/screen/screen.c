@@ -57,13 +57,17 @@ void print(const char* str, uint32_t color)
 {
     while (*str)
     {   
-        if(str[cursor_x] == '\n') {
+        if(*str == '\n') {
             cursor_x = 0;
             cursor_y += 16; // Move to the next line
             str++;
             continue;
         }
-
+        if (cursor_x == screen_width || cursor_x > screen_width){
+            cursor_x = 0;
+            cursor_y += 16;
+        }
+        
         draw_char(*str, cursor_x, cursor_y, color);
         cursor_x += 8; // Move to the next character position
         str++;

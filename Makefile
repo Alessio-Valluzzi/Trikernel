@@ -1,11 +1,10 @@
 CC=x86_64-elf-gcc
 LD=x86_64-elf-ld
-CCARG = -ffreestanding -m64 -O2 -Wall -Wextra -mcmodel=kernel -mno-red-zone
+CCARG = -ffreestanding -m64 -O2 -Wall -Wextra -mcmodel=kernel -mno-red-zone -Ikernel
 ASM=nasm
 LIB=kernel/libs/
 BUILD=build
 ISO_DIR=iso
-
 KERNEL=$(BUILD)/kernel.elf
 ISO=Trikernel.iso
 
@@ -29,17 +28,17 @@ $(BUILD)/kernel.o: kernel/kernel.c | $(BUILD)
 		-c kernel/kernel.c \
 		-o $@
 
-$(BUILD)/font.o: kernel/font.c | $(BUILD)
+$(BUILD)/font.o: kernel/screen/font.c | $(BUILD)
 	$(CC) \
 		$(CCARG) \
-		-c kernel/font.c \
+		-c kernel/screen/font.c \
 		-o $@
 
 
-$(BUILD)/screen.o: kernel/screen.c | $(BUILD)
+$(BUILD)/screen.o: kernel/screen/screen.c | $(BUILD)
 	$(CC) \
 		$(CCARG) \
-		-c kernel/screen.c \
+		-c kernel/screen/screen.c \
 		-o $@
 	
 $(BUILD)/math.o: $(LIB)/math/math.c | $(BUILD)
@@ -48,8 +47,14 @@ $(BUILD)/math.o: $(LIB)/math/math.c | $(BUILD)
 		-c $(LIB)/math/math.c \
 		-o $@
 
+$(BUILD)/keyboard.o: kernel/keyboard/keyboard.c | $(BUILD)
+	$(CC) \
+		$(CCARG) \
+		-c kernel/keyboard/keyboard.c \
+		-o $@
 
-$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o $(BUILD)/math.o
+
+$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o $(BUILD)/math.o $(BUILD)/keyboard.o
 	$(LD) \
 		-T linker.ld \
 		-nostdlib \

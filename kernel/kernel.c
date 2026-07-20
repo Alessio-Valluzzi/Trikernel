@@ -1,6 +1,8 @@
 #include "limine.h"
 #include "types.h"
-#include "screen.h"
+#include "screen/screen.h"
+#include "keyboard/keyboard.h"
+#include "transformetor.h"
 
 volatile unsigned long test = 123;
 
@@ -41,6 +43,18 @@ void kernel_main(void)
 
     print("Hello, World!", 0xFFFFFF);
 
+    if(init_keyboard() != 0){
+        print("KEYBOARD NOT INITALIZED", 0xFF0000);
+    }
+    while(1){
+        uint8_t key = keyboard_read();
+        if(key){
+            char list[4];
+            uint8_to_string(key, list);
+            print(list, 0xFFFFFF);
+        }
+        asm volatile("pause");
+    }
     while(1)
     {
         asm volatile("hlt");
