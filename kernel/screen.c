@@ -30,6 +30,26 @@ void putpixel(uint32_t x, uint32_t y, uint32_t color)
     *pixel = color;
 }
 
+extern unsigned char font[];
+
+void draw_char(char c, int x, int y, uint32_t color)
+{
+    unsigned char *glyph = &font[(unsigned char)c * 16];
+
+    for (int row = 0; row < 16; row++)
+    {
+        uint8_t bits = glyph[row];
+
+        for (int col = 0; col < 8; col++)
+        {
+            if (bits & (0x80 >> col))
+            {
+                putpixel(x + col, y + row, color);
+            }
+        }
+    }
+}
+
 
 void clear_screen(uint32_t color)
 {

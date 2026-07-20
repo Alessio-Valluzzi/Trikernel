@@ -33,6 +33,17 @@ $(BUILD)/kernel.o: kernel/kernel.c | $(BUILD)
 		-c kernel/kernel.c \
 		-o $@
 
+$(BUILD)/font.o: kernel/font.c | $(BUILD)
+	$(CC) \
+		-ffreestanding \
+		-m64 \
+		-O2 \
+		-Wall \
+		-Wextra \
+		-mno-red-zone \
+		-c kernel/font.c \
+		-o $@
+
 
 $(BUILD)/screen.o: kernel/screen.c | $(BUILD)
 	$(CC) \
@@ -46,7 +57,7 @@ $(BUILD)/screen.o: kernel/screen.c | $(BUILD)
 		-o $@
 
 
-$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o
+$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o
 	$(LD) \
 		-T linker.ld \
 		-nostdlib \
