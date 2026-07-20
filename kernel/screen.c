@@ -173,3 +173,63 @@ void draw_circle(int cx, int cy, int radius, uint32_t color)
         }
     }
 }
+
+
+void draw_bitmap(void *data, int pos_x, int pos_y)
+{
+    uint8_t *bmp = (uint8_t *)data;
+
+    // Controllo firma BMP: "BM"
+    if (bmp[0] != 'B' || bmp[1] != 'M')
+        return;
+
+
+    // Offset dove iniziano i pixel
+    uint32_t pixel_offset = *(uint32_t *)(bmp + 10);
+
+    // Larghezza e altezza
+    int32_t width  = *(int32_t *)(bmp + 18);
+    int32_t height = *(int32_t *)(bmp + 22);
+
+    // Bit per pixel
+    uint16_t bpp = *(uint16_t *)(bmp + 28);
+
+    // Supportiamo solo 24 bit
+    if (bpp != 24)
+        return;
+
+
+    uint8_t *pixels = bmp + pixel_offset;
+
+
+    // Ogni riga BMP è allineata a multipli di 4 byte
+    int row_size = (width * 3 + 3) & ~3;
+
+
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            int index = y * row_size + x * 3;
+
+
+            uint8_t blue  = pixels[index];
+            uint8_t green = pixels[index + 1];
+            uint8_t red   = pixels[index + 2];
+
+
+            uint32_t color =
+                (red << 16) |
+                (green << 8) |
+                blue;
+
+
+            // BMP è salvato dal basso verso l'alto
+            putpixel(
+                pos_x + x,
+                pos_y + (height - y - 1),
+                color
+            );
+        }
+    }
+}

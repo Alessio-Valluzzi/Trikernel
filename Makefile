@@ -42,7 +42,7 @@ $(BUILD)/screen.o: kernel/screen.c | $(BUILD)
 		-c kernel/screen.c \
 		-o $@
 	
-$(BUILD)/screen.o: $(LIB)/math/math.c | $(BUILD)
+$(BUILD)/math.o: $(LIB)/math/math.c | $(BUILD)
 	$(CC) \
 		$(CCARG) \
 		-c $(LIB)/math/math.c \
@@ -64,7 +64,7 @@ $(ISO): $(KERNEL)
 
 	# Kernel
 	cp $(KERNEL) $(ISO_DIR)/boot/kernel.elf
-
+	
 	# Limine config
 	cp limine.conf $(ISO_DIR)/limine.conf
 

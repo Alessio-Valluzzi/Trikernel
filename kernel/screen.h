@@ -23,4 +23,6 @@ void draw_rectangle(int x, int y, int width, int height, uint32_t color, booln f
 
 void draw_circle(int cx, int cy, int radius, uint32_t color);
 
+void draw_bitmap(void *data, int pos_x, int pos_y);
+
 #endif
