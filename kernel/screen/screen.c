@@ -53,8 +53,7 @@ void draw_char(char c, int x, int y, uint32_t color)
 }
 
 
-void print(const char* str, uint32_t color)
-{
+void print(const char* str, uint32_t color){
     while (*str)
     {   
         if(*str == '\n') {
@@ -63,6 +62,32 @@ void print(const char* str, uint32_t color)
             str++;
             continue;
         }
+
+        if(*str == '\t') {
+            cursor_x += 32; 
+            str++;
+            continue;
+        }
+        if(*str == '\b')
+        {
+            if(cursor_x >= 8)
+            {
+                cursor_x -= 8;
+                    for(int row = 0; row < 16; row++)
+
+                for(int col = 0; col < 8; col++)
+                {
+                    putpixel(
+                        cursor_x + col,
+                        cursor_y + row,
+                        0x000000
+                    );
+                }
+            }
+            str++;
+            continue;
+        }
+
         if (cursor_x == screen_width || cursor_x > screen_width){
             cursor_x = 0;
             cursor_y += 16;
@@ -74,8 +99,7 @@ void print(const char* str, uint32_t color)
     }
 }
 
-void clear_screen(uint32_t color)
-{
+void clear_screen(uint32_t color){
     for (uint64_t y = 0; y < screen_height; y++)
     {
         for (uint64_t x = 0; x < screen_width; x++)
@@ -86,15 +110,13 @@ void clear_screen(uint32_t color)
 }
 
 
-void set_cursor(int x, int y)
-{
+void set_cursor(int x, int y){
     cursor_x = x;
     cursor_y = y;
 }
 
 
-void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
-{
+void draw_line(int x0, int y0, int x1, int y1, uint32_t color){
     int dx = abs(x1 - x0);
     int dy = abs(y1 - y0);
     int sx = (x0 < x1) ? 1 : -1;
@@ -124,8 +146,7 @@ void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
     }
 }
 
-void draw_rectangle(int x, int y, int width, int height, uint32_t color, booln filled)
-{   
+void draw_rectangle(int x, int y, int width, int height, uint32_t color, booln filled){   
     if (width <= 0 || height <= 0) {
         return;
     }

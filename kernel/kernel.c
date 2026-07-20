@@ -47,11 +47,15 @@ void kernel_main(void)
         print("KEYBOARD NOT INITALIZED", 0xFF0000);
     }
     while(1){
-        uint8_t key = keyboard_read();
-        if(key){
-            char list[4];
-            uint8_to_string(key, list);
-            print(list, 0xFFFFFF);
+        char key = keyboard_read();
+        if(key)
+        {
+            char buffer[2];
+
+            buffer[0] = key;
+            buffer[1] = '\0';
+
+            print(buffer, 0xFFFFFF);
         }
         asm volatile("pause");
     }

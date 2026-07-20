@@ -5,7 +5,8 @@
 #include "asm/asm.h"
 #include "types.h"
 
+
 int init_keyboard();
-uint8_t keyboard_read();
+char keyboard_read();
 
 #endif
