@@ -120,7 +120,7 @@ void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
     }
 }
 
-void draw_rectangle(int x, int y, int width, int height, uint32_t color, bool filled)
+void draw_rectangle(int x, int y, int width, int height, uint32_t color, booln filled)
 {   
     if (width <= 0 || height <= 0) {
         return;
