@@ -6,6 +6,8 @@ static uint64_t screen_width;
 static uint64_t screen_height;
 static uint64_t screen_pitch;
 
+static int cursor_x = 0;
+static int cursor_y = 0;
 
 void screen_init(struct limine_framebuffer* fb)
 {
@@ -51,6 +53,23 @@ void draw_char(char c, int x, int y, uint32_t color)
 }
 
 
+void print(const char* str, uint32_t color)
+{
+    while (*str)
+    {   
+        if(str[cursor_x] == '\n') {
+            cursor_x = 0;
+            cursor_y += 16; // Move to the next line
+            str++;
+            continue;
+        }
+
+        draw_char(*str, cursor_x, cursor_y, color);
+        cursor_x += 8; // Move to the next character position
+        str++;
+    }
+}
+
 void clear_screen(uint32_t color)
 {
     for (uint64_t y = 0; y < screen_height; y++)
@@ -60,4 +79,11 @@ void clear_screen(uint32_t color)
             putpixel(x, y, color);
         }
     }
+}
+
+
+void set_cursor(int x, int y)
+{
+    cursor_x = x;
+    cursor_y = y;
 }

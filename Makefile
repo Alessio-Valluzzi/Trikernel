@@ -1,5 +1,6 @@
 CC=x86_64-elf-gcc
 LD=x86_64-elf-ld
+CCARG = -ffreestanding -m64 -O2 -Wall -Wextra -mcmodel=kernel -mno-red-zone
 ASM=nasm
 
 BUILD=build
@@ -24,35 +25,20 @@ $(BUILD)/entry.o: kernel/entry.asm | $(BUILD)
 
 $(BUILD)/kernel.o: kernel/kernel.c | $(BUILD)
 	$(CC) \
-		-ffreestanding \
-		-m64 \
-		-O2 \
-		-Wall \
-		-Wextra \
-		-mno-red-zone \
+		$(CCARG) \
 		-c kernel/kernel.c \
 		-o $@
 
 $(BUILD)/font.o: kernel/font.c | $(BUILD)
 	$(CC) \
-		-ffreestanding \
-		-m64 \
-		-O2 \
-		-Wall \
-		-Wextra \
-		-mno-red-zone \
+		$(CCARG) \
 		-c kernel/font.c \
 		-o $@
 
 
 $(BUILD)/screen.o: kernel/screen.c | $(BUILD)
 	$(CC) \
-		-ffreestanding \
-		-m64 \
-		-O2 \
-		-Wall \
-		-Wextra \
-		-mno-red-zone \
+		$(CCARG) \
 		-c kernel/screen.c \
 		-o $@
 

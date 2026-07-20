@@ -37,19 +37,13 @@ void kernel_main(void)
 
     screen_init(fb);
 
-    clear_screen(0x00202020);
+    clear_screen(0x000000);
 
-    for (int y = 0; y < 100; y++)
-    {
-        for (int x = 0; x < 100; x++)
-        {
-            putpixel(x, y, 0x00FF0000);
-        }
-    }
-
+    print("Hello, World!", 0xFFFFFF);
 
     while(1)
     {
         asm volatile("hlt");
     }
+
 }
