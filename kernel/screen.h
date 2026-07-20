@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "limine.h"
+#include "libs/math/math.h"
 
 void screen_init(struct limine_framebuffer* fb);
 

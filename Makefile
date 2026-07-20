@@ -2,7 +2,7 @@ CC=x86_64-elf-gcc
 LD=x86_64-elf-ld
 CCARG = -ffreestanding -m64 -O2 -Wall -Wextra -mcmodel=kernel -mno-red-zone
 ASM=nasm
-
+LIB=kernel/libs/
 BUILD=build
 ISO_DIR=iso
 
@@ -41,9 +41,15 @@ $(BUILD)/screen.o: kernel/screen.c | $(BUILD)
 		$(CCARG) \
 		-c kernel/screen.c \
 		-o $@
+	
+$(BUILD)/screen.o: $(LIB)/math/math.c | $(BUILD)
+	$(CC) \
+		$(CCARG) \
+		-c $(LIB)/math/math.c \
+		-o $@
 
 
-$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o
+$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o $(BUILD)/math.o
 	$(LD) \
 		-T linker.ld \
 		-nostdlib \
