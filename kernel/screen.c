@@ -87,3 +87,89 @@ void set_cursor(int x, int y)
     cursor_x = x;
     cursor_y = y;
 }
+
+
+void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
+{
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx - dy;
+
+    while (1)
+    {
+        putpixel(x0, y0, color);
+
+        if (x0 == x1 && y0 == y1)
+            break;
+
+        int e2 = err * 2;
+
+        if (e2 > -dy)
+        {
+            err -= dy;
+            x0 += sx;
+        }
+
+        if (e2 < dx)
+        {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+void draw_rectangle(int x, int y, int width, int height, uint32_t color, bool filled)
+{   
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    
+    if (filled)
+    {
+        for (int i = 0; i < height; i++)
+        {
+            draw_line(x, y + i, x + width - 1, y + i, color);
+        }
+    }
+    else
+    {
+        draw_line(x, y, x + width - 1, y, color); // sopra
+        draw_line(x, y + height - 1, x + width - 1, y + height - 1, color); // sotto
+
+        draw_line(x, y, x, y + height - 1, color); // sinistra
+        draw_line(x + width - 1, y, x + width - 1, y + height - 1, color); // destra
+    }
+}
+
+void draw_circle(int cx, int cy, int radius, uint32_t color)
+{
+    int x = radius;
+    int y = 0;
+    int decision = 1 - radius;
+
+    while (x >= y)
+    {
+        putpixel(cx + x, cy + y, color);
+        putpixel(cx + y, cy + x, color);
+        putpixel(cx - y, cy + x, color);
+        putpixel(cx - x, cy + y, color);
+        putpixel(cx - x, cy - y, color);
+        putpixel(cx - y, cy - x, color);
+        putpixel(cx + y, cy - x, color);
+        putpixel(cx + x, cy - y, color);
+
+        y++;
+
+        if (decision <= 0)
+        {
+            decision += 2 * y + 1;
+        }
+        else
+        {
+            x--;
+            decision += 2 * (y - x) + 1;
+        }
+    }
+}
