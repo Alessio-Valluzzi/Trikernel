@@ -2,6 +2,7 @@
 #include "types.h"
 #include "screen/screen.h"
 #include "keyboard/keyboard.h"
+#include "screen/log.h"
 #include "transformetor.h"
 
 volatile unsigned long test = 123;
@@ -44,7 +45,7 @@ void kernel_main(void)
     print("Hello, World!", 0xFFFFFF);
 
     if(init_keyboard() != 0){
-        print("KEYBOARD NOT INITALIZED", 0xFF0000);
+        panic("KEYBOARD NOT INITALIZED");
     }
     while(1){
         char key = keyboard_read();

@@ -88,7 +88,8 @@ void print(const char* str, uint32_t color){
             continue;
         }
 
-        if (cursor_x == screen_width || cursor_x > screen_width){
+        if(cursor_x + 8 > screen_width)
+        {
             cursor_x = 0;
             cursor_y += 16;
         }

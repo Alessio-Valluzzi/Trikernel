@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include "screen/screen.h"
+#include "screen/log.h"
 
 uint16_t status_p = 0x64;
 uint16_t dat_p = 0x60;
@@ -68,7 +69,7 @@ int init_keyboard(){
     if(inb(status_p) == 0xFF)
         return -1;
     outb(status_p, ready_S);
-    print("\n[OK] PS/2 Keyboard initialized", 0xFFFFFF);
+    OK("PS/2 Keyboard initialized");
     return 0;
 }   
 

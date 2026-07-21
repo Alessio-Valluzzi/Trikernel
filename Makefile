@@ -35,10 +35,16 @@ $(BUILD)/font.o: kernel/screen/font.c | $(BUILD)
 		-o $@
 
 
-$(BUILD)/screen.o: kernel/screen/screen.c | $(BUILD)
+$(BUILD)/log.o: kernel/screen/screen.c | $(BUILD)
 	$(CC) \
 		$(CCARG) \
 		-c kernel/screen/screen.c \
+		-o $@
+
+$(BUILD)/screen.o: kernel/screen/log.c | $(BUILD)
+	$(CC) \
+		$(CCARG) \
+		-c kernel/screen/log.c \
 		-o $@
 	
 $(BUILD)/math.o: $(LIB)/math/math.c | $(BUILD)
@@ -54,7 +60,7 @@ $(BUILD)/keyboard.o: kernel/keyboard/keyboard.c | $(BUILD)
 		-o $@
 
 
-$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o $(BUILD)/math.o $(BUILD)/keyboard.o
+$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o $(BUILD)/math.o $(BUILD)/keyboard.o $(BUILD)/log.o
 	$(LD) \
 		-T linker.ld \
 		-nostdlib \
@@ -113,8 +119,7 @@ run: $(ISO)
 		-m 512M \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
-		-cdrom $(ISO) \
-		-serial stdio
+		-cdrom $(ISO)
 
 
 clean:
