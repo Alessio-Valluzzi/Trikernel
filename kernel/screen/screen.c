@@ -93,6 +93,11 @@ void print(const char* str, uint32_t color){
             cursor_x = 0;
             cursor_y += 16;
         }
+
+        if(cursor_y + 16 > screen_height)
+        {
+            scroll();
+        }
         
         draw_char(*str, cursor_x, cursor_y, color);
         cursor_x += 8; // Move to the next character position
@@ -258,4 +263,40 @@ void draw_bitmap(void *data, int pos_x, int pos_y)
             );
         }
     }
+}
+
+void scroll()
+{
+    // Sposta tutto il framebuffer verso l'alto di 16 pixel
+    for (uint64_t y = 0; y < screen_height - 16; y++)
+    {
+        for (uint64_t x = 0; x < screen_width; x++)
+        {
+            uint32_t* src =
+                (uint32_t*)((uint8_t*)framebuffer +
+                (y + 16) * screen_pitch +
+                x * 4);
+
+            uint32_t* dst =
+                (uint32_t*)((uint8_t*)framebuffer +
+                y * screen_pitch +
+                x * 4);
+
+            *dst = *src;
+        }
+    }
+
+
+    // Cancella l'ultima riga
+    for (uint64_t y = screen_height - 16; y < screen_height; y++)
+    {
+        for (uint64_t x = 0; x < screen_width; x++)
+        {
+            putpixel(x, y, 0x000000);
+        }
+    }
+
+
+    // Rimani sulla nuova ultima riga
+    cursor_y = screen_height - 16;
 }
