@@ -3,7 +3,7 @@
 #include "screen/screen.h"
 #include "keyboard/keyboard.h"
 #include "screen/log.h"
-#include "transformetor.h"
+#include "smbios/smbios.h"
 
 volatile unsigned long test = 123;
 
@@ -20,6 +20,14 @@ volatile struct limine_framebuffer_request framebuffer_request =
 };
 
 
+__attribute__((used, section(".limine_requests")))
+volatile struct limine_smbios_request smbios_request =
+{
+    .id = LIMINE_SMBIOS_REQUEST_ID,
+    .revision = 0,
+    .response = 0
+};
+
 __attribute__((used, section(".limine_requests_end")))
 volatile uint64_t limine_requests_end[] = LIMINE_REQUESTS_END_MARKER;
 
@@ -34,7 +42,6 @@ void kernel_main(void)
         }
     }
 
-
     struct limine_framebuffer *fb =
         framebuffer_request.response->framebuffers[0];
 
@@ -42,27 +49,37 @@ void kernel_main(void)
 
     clear_screen(0x000000);
 
-    print("Hello, World!", 0xFFFFFF);
+    print("Loading...", 0xFFFFFF);
+    //VM Detection
+    uint32_t eax, ebx, ecx, edx;
+
+    eax = 1;
+
+    asm volatile(
+        "cpuid"
+        : "+a"(eax),
+        "=b"(ebx),
+        "=c"(ecx),
+        "=d"(edx)
+    );
+
+    if(ecx & (1 << 31))
+    {
+        info("Running in VM");
+    }
 
     if(init_keyboard() != 0){
         panic("KEYBOARD NOT INITALIZED");
     }
-    while(1){
-        char key = keyboard_read();
-        if(key)
-        {
-            char buffer[2];
 
-            buffer[0] = key;
-            buffer[1] = '\0';
-
-            print(buffer, 0xFFFFFF);
-        }
-        asm volatile("pause");
-    }
-    while(1)
+    if (smbios_request.response == 0)
     {
-        asm volatile("hlt");
+        warning("SMBios table not loaded");
+    } else {
+       OK("SMBios table loaded");
+       smbios_init(smbios_request.response, true);
+       
     }
+    
 
 }

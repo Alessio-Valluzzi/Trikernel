@@ -9,4 +9,8 @@ void panic(char* str);
 
 void OK(char* str);
 
+void warning(char* str);
+
+void info(char* str);
+
 #endif

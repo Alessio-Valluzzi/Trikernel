@@ -53,14 +53,35 @@ $(BUILD)/math.o: $(LIB)/math/math.c | $(BUILD)
 		-c $(LIB)/math/math.c \
 		-o $@
 
+$(BUILD)/string.o: $(LIB)/string/string.c | $(BUILD)
+	$(CC) \
+		$(CCARG) \
+		-c $(LIB)/string/string.c \
+		-o $@
+
 $(BUILD)/keyboard.o: kernel/keyboard/keyboard.c | $(BUILD)
 	$(CC) \
 		$(CCARG) \
 		-c kernel/keyboard/keyboard.c \
 		-o $@
 
+$(BUILD)/smbios.o: kernel/smbios/smbios.c | $(BUILD)
+	$(CC) \
+		$(CCARG) \
+		-c kernel/smbios/smbios.c \
+		-o $@
 
-$(KERNEL): $(BUILD)/entry.o $(BUILD)/kernel.o $(BUILD)/screen.o $(BUILD)/font.o $(BUILD)/math.o $(BUILD)/keyboard.o $(BUILD)/log.o
+
+$(KERNEL): \
+	$(BUILD)/entry.o \
+	$(BUILD)/kernel.o \
+	$(BUILD)/screen.o \
+	$(BUILD)/font.o \
+	$(BUILD)/math.o \
+	$(BUILD)/keyboard.o \
+	$(BUILD)/log.o \
+	$(BUILD)/smbios.o \
+	$(BUILD)/string.o
 	$(LD) \
 		-T linker.ld \
 		-nostdlib \
@@ -114,12 +135,16 @@ $(ISO): $(KERNEL)
 	limine bios-install $(ISO)
 
 run: $(ISO)
+	rm OVMF_VARS.4m.fd
+	cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
+	python3 tool/smbios.py
 	qemu-system-x86_64 \
 		-machine q35 \
-		-m 512M \
+		-m 2G \
+		-smbios file=smbios.bin \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
-		-cdrom $(ISO)
+		-cdrom Trikernel.iso
 
 
 clean:
