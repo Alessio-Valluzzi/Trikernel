@@ -4,6 +4,8 @@
 #include "keyboard/keyboard.h"
 #include "screen/log.h"
 #include "smbios/smbios.h"
+#include "mem/ram.h"
+#include "libs/string/string.h"
 
 volatile unsigned long test = 123;
 
@@ -24,6 +26,14 @@ __attribute__((used, section(".limine_requests")))
 volatile struct limine_smbios_request smbios_request =
 {
     .id = LIMINE_SMBIOS_REQUEST_ID,
+    .revision = 0,
+    .response = 0
+};
+
+__attribute__((used, section(".limine_requests")))
+volatile struct limine_memmap_request memmap_request =
+{
+    .id = LIMINE_MEMMAP_REQUEST_ID,
     .revision = 0,
     .response = 0
 };
@@ -50,7 +60,6 @@ void kernel_main(void)
     clear_screen(0x000000);
 
     print("Loading...", 0xFFFFFF);
-    //VM Detection
     uint32_t eax, ebx, ecx, edx;
 
     eax = 1;
@@ -66,20 +75,23 @@ void kernel_main(void)
     if(ecx & (1 << 31))
     {
         info("Running in VM");
-    }
-
-    if(init_keyboard() != 0){
-        panic("KEYBOARD NOT INITALIZED");
+     
     }
 
     if (smbios_request.response == 0)
     {
         warning("SMBios table not loaded");
     } else {
-       OK("SMBios table loaded");
        smbios_init(smbios_request.response, true);
-       
+       OK("SMBios table loaded");
     }
-    
+
+    if (memmap_request.response == 0)
+    {
+        panic("Memory map not loaded");
+    } else {
+       init_ram(memmap_request.response);
+       OK("Memory map loaded");
+    }
 
 }

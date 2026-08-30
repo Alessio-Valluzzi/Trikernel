@@ -1,14 +1,24 @@
-CC=x86_64-elf-gcc
-LD=x86_64-elf-ld
-CCARG = -ffreestanding -m64 -O2 -Wall -Wextra -mcmodel=kernel -mno-red-zone -Ikernel
-ASM=nasm
-LIB=kernel/libs/
-BUILD=build
-ISO_DIR=iso
-KERNEL=$(BUILD)/kernel.elf
-ISO=Trikernel.iso
+CC = x86_64-elf-gcc
+LD = x86_64-elf-ld
+ASM = nasm
 
-LIMINE_DIR=/usr/share/limine
+CFLAGS = -ffreestanding -m64 -O2 -Wall -Wextra -mcmodel=kernel -mno-red-zone -Ikernel
+
+BUILD = build
+ISO_DIR = iso
+
+KERNEL = $(BUILD)/kernel.elf
+ISO = Trikernel.iso
+
+LIMINE_DIR = /usr/share/limine
+
+C_SRC := $(shell find kernel -type f -name '*.c')
+ASM_SRC := $(shell find kernel -type f -name '*.asm')
+
+C_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(C_SRC))
+ASM_OBJ := $(patsubst %.asm,$(BUILD)/%.o,$(ASM_SRC))
+
+OBJ := $(C_OBJ) $(ASM_OBJ)
 
 
 all: $(ISO)
@@ -18,75 +28,19 @@ $(BUILD):
 	mkdir -p $(BUILD)
 
 
-$(BUILD)/entry.o: kernel/entry.asm | $(BUILD)
-	$(ASM) -f elf64 kernel/entry.asm -o $@
+$(BUILD)/%.o: %.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 
-$(BUILD)/kernel.o: kernel/kernel.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c kernel/kernel.c \
-		-o $@
-
-$(BUILD)/font.o: kernel/screen/font.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c kernel/screen/font.c \
-		-o $@
+$(BUILD)/%.o: %.asm
+	mkdir -p $(dir $@)
+	$(ASM) -f elf64 $< -o $@
 
 
-$(BUILD)/log.o: kernel/screen/screen.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c kernel/screen/screen.c \
-		-o $@
+$(KERNEL): $(OBJ) linker.ld
+	$(LD) -T linker.ld -nostdlib -o $@ $(OBJ)
 
-$(BUILD)/screen.o: kernel/screen/log.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c kernel/screen/log.c \
-		-o $@
-	
-$(BUILD)/math.o: $(LIB)/math/math.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c $(LIB)/math/math.c \
-		-o $@
-
-$(BUILD)/string.o: $(LIB)/string/string.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c $(LIB)/string/string.c \
-		-o $@
-
-$(BUILD)/keyboard.o: kernel/keyboard/keyboard.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c kernel/keyboard/keyboard.c \
-		-o $@
-
-$(BUILD)/smbios.o: kernel/smbios/smbios.c | $(BUILD)
-	$(CC) \
-		$(CCARG) \
-		-c kernel/smbios/smbios.c \
-		-o $@
-
-
-$(KERNEL): \
-	$(BUILD)/entry.o \
-	$(BUILD)/kernel.o \
-	$(BUILD)/screen.o \
-	$(BUILD)/font.o \
-	$(BUILD)/math.o \
-	$(BUILD)/keyboard.o \
-	$(BUILD)/log.o \
-	$(BUILD)/smbios.o \
-	$(BUILD)/string.o
-	$(LD) \
-		-T linker.ld \
-		-nostdlib \
-		-o $@ \
-		$^
 
 $(ISO): $(KERNEL)
 	rm -rf $(ISO_DIR)
@@ -94,25 +48,18 @@ $(ISO): $(KERNEL)
 	mkdir -p $(ISO_DIR)/boot
 	mkdir -p $(ISO_DIR)/EFI/BOOT
 
-	# Kernel
 	cp $(KERNEL) $(ISO_DIR)/boot/kernel.elf
-	
-	# Limine config
 	cp limine.conf $(ISO_DIR)/limine.conf
 
-	# UEFI loader
 	cp $(LIMINE_DIR)/BOOTX64.EFI \
 		$(ISO_DIR)/EFI/BOOT/BOOTX64.EFI
 
-	# Limine El Torito images
 	cp $(LIMINE_DIR)/limine-bios-cd.bin \
 		$(ISO_DIR)/limine-bios-cd.bin
 
 	cp $(LIMINE_DIR)/limine-uefi-cd.bin \
 		$(ISO_DIR)/limine-uefi-cd.bin
 
-
-	# Crea ISO ibrida BIOS + UEFI
 	xorriso \
 		-as mkisofs \
 		-o $(ISO) \
@@ -130,22 +77,20 @@ $(ISO): $(KERNEL)
 		-appended_part_as_gpt \
 		$(ISO_DIR)
 
-
-	# Installa bootloader BIOS Limine
 	limine bios-install $(ISO)
 
 run: $(ISO)
-	rm OVMF_VARS.4m.fd
+	rm -f OVMF_VARS.4m.fd
 	cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
 	python3 tool/smbios.py
-	qemu-system-x86_64 \
+	qemu-system-x86_64 -d in_asm -D qemu.log \
 		-machine q35 \
-		-m 2G \
+		-m 128m \
 		-smbios file=smbios.bin \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
-		-cdrom Trikernel.iso
-
+		-cdrom Trikernel.iso \
+		-display gtk 
 
 clean:
-	rm -rf $(BUILD) $(ISO_DIR) *.iso
+	rm -rf $(BUILD) $(ISO_DIR) *.iso OVMF_VARS.4m.fd

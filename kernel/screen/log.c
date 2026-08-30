@@ -3,6 +3,7 @@
 void panic(char* str){
     print("\n[KERNEL PANIC] ", 0xFF0000);
     print(str, 0xFFFFFF);
+    __asm__ volatile("cli");
     while(1){
         __asm__ volatile("hlt");
     }

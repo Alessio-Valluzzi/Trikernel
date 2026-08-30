@@ -51,7 +51,7 @@ void uint64_to_string(uint64_t num, char *str)
         return;
     }
 
-    char temp[20];
+    char temp[60];
 
     while(num > 0)
     {
@@ -69,24 +69,21 @@ void uint64_to_string(uint64_t num, char *str)
     str[j] = '\0';
 }
 
-void strcat(char *dest, const char *src)
+void string_concat(char *dest, const char *src)
 {
-    int i = 0;
-    int j = 0;
-
-    while(dest[i] != '\0')
+    while(*dest)
     {
-        i++;
+        dest++;
     }
 
-    while(src[j] != '\0')
+    while(*src)
     {
-        dest[i] = src[j];
-        i++;
-        j++;
+        *dest = *src;
+        dest++;
+        src++;
     }
 
-    dest[i] = '\0';
+    *dest = '\0';
 }
 
 void uint16_to_string(uint16_t num, char *str)

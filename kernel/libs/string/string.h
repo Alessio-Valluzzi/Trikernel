@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-int strcmp(const char *a, const char *b);
+void string_concat(char *dest, const char *src);
 
 void uint8_to_string(uint8_t num, char *str);
 
