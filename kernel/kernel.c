@@ -38,9 +38,18 @@ volatile struct limine_memmap_request memmap_request =
     .response = 0
 };
 
+__attribute__((used, section(".limine_requests")))
+volatile struct limine_hhdm_request hhdm_request =
+{
+    .id = LIMINE_HHDM_REQUEST_ID,
+    .revision = 0,
+    .response = 0
+};
+
 __attribute__((used, section(".limine_requests_end")))
 volatile uint64_t limine_requests_end[] = LIMINE_REQUESTS_END_MARKER;
 
+uint64_t hhdm_offset = 0;
 
 void kernel_main(void)
 {   
@@ -85,6 +94,11 @@ void kernel_main(void)
        smbios_init(smbios_request.response, true);
        OK("SMBios table loaded");
     }
+
+    if (hhdm_request.response == 0)
+    panic("HHDM response is NULL");
+    hhdm_offset = hhdm_request.response->offset;
+    OK("HHDM offset loaded");
 
     if (memmap_request.response == 0)
     {

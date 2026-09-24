@@ -84,13 +84,11 @@ run: $(ISO)
 	cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
 	python3 tool/smbios.py
 	qemu-system-x86_64 -d in_asm -D qemu.log \
-		-machine q35 \
+		-machine pc \
 		-m 128m \
-		-smbios file=smbios.bin \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
 		-cdrom Trikernel.iso \
-		-display gtk 
-
+		-display gtk
 clean:
 	rm -rf $(BUILD) $(ISO_DIR) *.iso OVMF_VARS.4m.fd

@@ -17,7 +17,7 @@ void init_vmm()
         return;
     }
 
-    uint64_t pml4_phys = alloc_page();
+    pml4_phys = alloc_page();
     
     if(pml4_phys == 0)
     {   
